@@ -1,7 +1,7 @@
 from os import path
 
 from MOCK_Knowledge_base.KB import get_KB
-from MOCK_Knowledge_base.knowledge_base import KnowledgeBase
+from MOCK_Knowledge_base.knowledge_base_interface import KnowledgeBase
 from KPI_engine.EngineKPI.kpi_engine import KPIEngine
 import pandas as pd
 
