@@ -1,0 +1,17 @@
+# Byte-compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Docker files
+*.log
+*.pid
+*.sock
+
+# Ignore Docker-related cache and build files
+.dockerignore
+*.tar
+*.bat
