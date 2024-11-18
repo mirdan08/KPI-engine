@@ -1,4 +1,4 @@
-from .KB import get_KB
+from MOCK_Knowledge_base.KB import get_KB
 
 # simulate checking with the ontology if calculations requested are actually possible
 class KnowledgeBaseInterface:

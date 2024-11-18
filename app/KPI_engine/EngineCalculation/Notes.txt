@@ -1,0 +1,9 @@
+- Si possono usare le funzioni di base
+- Non si possono far eseguire funzioni prima di averle create (questo perchè bisognerebbe fare la parte di Checking ed esecuzione insieme / scritto apparte e non ha senso)
+- Si possono scrivere nomi di altre funzioni (perchè ridanno un valore non bisogna passargli una variabile)
+- Si possono creare gl' alert
+- Non si possono  richiamare alert da altre funzioni / alert (non devi fare if else o cose simili)
+- Se in una condizione uno dei 2 lati è lista, si ridà errore perchè non si può confrontare 2 liste, ma solo 2 scalari
+- Tutte le base function devono ridare un float.
+
+- VIene controllato se ci sono operazioni che dividono per 0
