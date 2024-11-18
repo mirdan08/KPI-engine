@@ -1,5 +1,5 @@
 # Use the official FastAPI/Uvicorn image
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # Set the working directory in the container
 WORKDIR /kpi-engine

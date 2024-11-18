@@ -1,6 +1,9 @@
 import pandas as pd
+from os import path
 
-Dataset = pd.read_csv("MOCK_Database\smart_app_data.csv")
+DB_PATH=path.join("MOCK_Database","smart_app_data.csv")
+
+Dataset = pd.read_csv(DB_PATH)
 
 def GetValues(machine, KPI, range, operation = "sum"):
 
