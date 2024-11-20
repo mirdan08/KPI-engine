@@ -3,7 +3,7 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestArgs": [
         "-s",
-        "KPI_engine/Tests",
+        "app/KPI_engine/Tests",
         "-p",
         "test_*.py"
     ],

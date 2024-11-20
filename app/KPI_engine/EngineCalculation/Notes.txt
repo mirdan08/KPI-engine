@@ -5,5 +5,6 @@
 - Non si possono  richiamare alert da altre funzioni / alert (non devi fare if else o cose simili)
 - Se in una condizione uno dei 2 lati è lista, si ridà errore perchè non si può confrontare 2 liste, ma solo 2 scalari
 - Tutte le base function devono ridare un float.
+- Se esiste una KPI con lo stesso nome di un alert o di una function, verrà considerata la function / alert (se non è nostro compito controllare se sono disponibili le KPI)
 
-- VIene controllato se ci sono operazioni che dividono per 0
+- Viene controllato se ci sono operazioni che dividono per 0

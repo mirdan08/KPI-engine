@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(f"{os.getcwd()}\KPI_engine")
+sys.path.append(f"{os.getcwd()}\\app\\KPI_engine")
 
 import unittest
 
@@ -12,44 +12,49 @@ class TestCalculationLogic(unittest.TestCase):
     
     def test_getters_calculator(self):
         
-        engine.add_function("fun12", "Description1", "cycles")
-        engine.add_function("fun22", "Description2", "max(cycles) + 3 + fun12")
+        engine.add_complex_KPI("fun12", "Description1", "cycles")
+        engine.add_complex_KPI("fun22", "Description2", "max(cycles) + 3 + fun12")
         
-        fun2 = engine.get_function("fun22")
+        fun2 = engine.get_complex_KPI("fun22")
         
         self.assertEquals(fun2.get_name(), "fun22")
         self.assertEquals(fun2.get_description(), "Description2")
         self.assertEquals(fun2.get_expression(), "base_max(cycles) + 3 + fun12")
         self.assertEquals(fun2.get_KPIs(), ["cycles"])
-        self.assertEquals(fun2.get_complex_functions(), ["fun12"])
+        self.assertEquals(fun2.get_complex_KPIs(), ["fun12"])
         self.assertEquals(fun2.get_result_type(), float)
         
-        engine.remove_function("fun12")
-        engine.remove_function("fun22")
+        engine.remove_complex_KPI("fun12")
+        engine.remove_complex_KPI("fun22")
 
     def test_error_calculator(self):
         
         with self.assertRaises(SyntaxError):
-            engine.add_function("function13", "", "cycles_ + 3")
-            engine.add_function("function13", "", "cycles + 3 + function1")
+            engine.add_complex_KPI("function13", "", "cycles_ + 3")
+            engine.add_complex_KPI("function13", "", "cycles + 3 + function1")
+            
+            engine.add_complex_KPI("function93", "", "function93 + 3")
+            engine.add_alert("function93", "", "function93 > 0")
         
         with self.assertRaises(TypeError):
             
-            engine.add_function("function33", "", "2 < cycles")
-            engine.add_function("function73", "", "fun2 / 0")
+            engine.add_complex_KPI("function33", "", "2 < cycles")
+            engine.add_complex_KPI("function73", "", "fun2 / 0")
             engine.add_alert("function53", "", "2 + cycles")
             engine.add_alert("function53", "", "cycles > 0")
             engine.add_alert("function53", "", "0 > cycles")
             engine.add_alert("function53", "", "cycles > cycles")
             engine.add_alert("function73", "", "2 / 0 > 5")
         
-            
+            #Base function are not aviable
+            #Other function are not aviable
+                
     def test_add_calculator(self):    
         
-        self.assertTrue(engine.add_function("function1", "", "cycles + 3"))        
-        self.assertFalse(engine.add_function("function1", "", "cycles + 3"))
-        self.assertTrue(engine.add_function("function2", "", "cycles + 3"))
-        self.assertTrue(engine.add_function("function10", "", "cycles + 3 + function2"))
+        self.assertTrue(engine.add_complex_KPI("function1", "", "cycles + 3"))        
+        self.assertFalse(engine.add_complex_KPI("function1", "", "cycles + 3"))
+        self.assertTrue(engine.add_complex_KPI("function2", "", "cycles + 3"))
+        self.assertTrue(engine.add_complex_KPI("function10", "", "cycles + 3 + function2"))
 
         self.assertTrue(engine.add_alert("function3", "", "2 < max(cycles)"))
         self.assertFalse(engine.add_alert("function3", "", "2 < max(cycles)"))
@@ -57,19 +62,19 @@ class TestCalculationLogic(unittest.TestCase):
         
     def test_get_calculator(self):
         
-        self.assertTrue(type(engine.get_function("function1")), CalculationEngine.Calculator)
-        self.assertTrue(type(engine.get_function("function3")), None)
+        self.assertTrue(type(engine.get_complex_KPI("function1")), CalculationEngine.Calculator)
+        self.assertTrue(type(engine.get_complex_KPI("function3")), None)
         
         self.assertTrue(type(engine.get_alert("function3")), CalculationEngine.Calculator)
         self.assertTrue(type(engine.get_alert("function5")), None)
         
     def test_remove_calculator(self):
             
-        self.assertTrue(engine.remove_function("function1"))
-        self.assertFalse(engine.remove_function("function1"))
-        self.assertFalse(engine.remove_function("function5"))
-        self.assertTrue(engine.remove_function("function2"))
-        self.assertTrue(engine.remove_function("function10"))
+        self.assertTrue(engine.remove_complex_KPI("function1"))
+        self.assertFalse(engine.remove_complex_KPI("function1"))
+        self.assertFalse(engine.remove_complex_KPI("function5"))
+        self.assertTrue(engine.remove_complex_KPI("function2"))
+        self.assertTrue(engine.remove_complex_KPI("function10"))
         
         self.assertFalse(engine.remove_alert("function2"))
         self.assertTrue(engine.remove_alert("function3"))
@@ -77,25 +82,39 @@ class TestCalculationLogic(unittest.TestCase):
     
     def test_calculate_calculator(self):
 
-        engine.add_function("fun1", "", "max(cycles)")
-        engine.add_function("fun2", "", "max(cycles - 1)")
-        engine.add_function("fun3", "", "max(cycles + 1)")
-        engine.add_function("fun4", "", "max(cycles * 0)")
-        engine.add_function("fun5", "", "max(cycles / 2)")
-        engine.add_function("fun6", "", "-3 + -4")
-        engine.add_function("fun7", "", "fun2 + 2")
-
-        self.assertEqual(engine.get_function("fun1")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 16720.0)
-        self.assertEqual(engine.get_function("fun2")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 16719.0)
-        self.assertEqual(engine.get_function("fun3")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 16721.0) 
-        self.assertEqual(engine.get_function("fun4")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 0)
-        self.assertEqual(engine.get_function("fun5")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 16720 / 2)
-        self.assertEqual(engine.get_function("fun6")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), -7)
-        self.assertEqual(engine.get_function("fun7")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), 16721.0)
+        engine.add_complex_KPI("fun1", "", "max(cycles)")
+        engine.add_complex_KPI("fun2", "", "max(cycles - 1)")
+        engine.add_complex_KPI("fun3", "", "max(cycles + 1)")
+        engine.add_complex_KPI("fun4", "", "max(cycles * 0)")
+        engine.add_complex_KPI("fun5", "", "max(cycles / 2)")
+        engine.add_complex_KPI("fun6", "", "-3 + -4")
+        engine.add_complex_KPI("fun7", "", "fun2 + 2")
+        
+        self.assertEqual(engine.get_complex_KPI("fun1")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 16720.0)
+        self.assertEqual(engine.get_complex_KPI("fun2")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 16719.0)
+        self.assertEqual(engine.get_complex_KPI("fun3")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 16721.0) 
+        self.assertEqual(engine.get_complex_KPI("fun4")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 0)
+        self.assertEqual(engine.get_complex_KPI("fun5")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 16720 / 2)
+        self.assertEqual(engine.get_complex_KPI("fun6")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], -7)
+        self.assertEqual(engine.get_complex_KPI("fun7")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], 16721.0)
         
         engine.add_alert("fun1", "", "max(cycles) + fun6 > 0")
-        self.assertEquals(engine.get_alert("fun1")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19"), True)
+        self.assertEquals(engine.get_alert("fun1")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")["values"], True)
         engine.remove_alert("fun2")
+        
+        engine.add_complex_KPI("fun8", "", "cycles + 2")
+        
+        Result1 = engine.get_complex_KPI("fun8")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
+        Result2 = engine.get_complex_KPI("fun7")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
+        
+        self.assertNotIsInstance(Result1["values"], float)
+        self.assertNotIsInstance(Result1["values"], bool)
+        self.assertIsInstance(Result2["values"], float)
+        
+        self.assertNotIsInstance(Result1["time"], float)
+        self.assertNotIsInstance(Result1["time"], bool)
+        
+        self.assertEqual(Result2["time"], None)
 
 if __name__ == "__main__":
     unittest.main()
