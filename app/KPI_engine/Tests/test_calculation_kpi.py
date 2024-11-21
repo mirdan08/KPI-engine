@@ -31,18 +31,22 @@ class TestCalculationLogic(unittest.TestCase):
 
     def test_error_calculator(self):
         
+        engine.add_complex_KPI("f3", "", "cycles + 3")
+        
         with self.assertRaises(SyntaxError):
-            engine.add_complex_KPI("function13", "", "cycles_ + 3")
-            engine.add_complex_KPI("function13", "", "cycles + 3 + function1")
+            engine.add_complex_KPI("function03", "", "cycles_ + 3")
             
+        with self.assertRaises(SyntaxError):
             engine.add_complex_KPI("function93", "", "function93 + 3")
+            
+        with self.assertRaises(SyntaxError):
             engine.add_alert("function93", "", "function93 > 0")
         
         with self.assertRaises(TypeError): 
             engine.add_complex_KPI("function33", "", "2 < cycles")
             
         with self.assertRaises(TypeError): 
-            engine.add_complex_KPI("function73", "", "fun2 / 0")
+            engine.add_complex_KPI("function73", "", "f3 / 0")
         
         with self.assertRaises(TypeError): 
             engine.add_alert("function53", "", "2 + cycles")
@@ -113,25 +117,22 @@ class TestCalculationLogic(unittest.TestCase):
         engine.add_complex_KPI("fun991", "", "cycles")
         engine.add_complex_KPI("fun992", "", "max(cycles)")
         engine.add_alert("fun991", "", "cycles > 0")
+        engine.add_alert("fun992", "", "max(cycles) > 0")
         
         Result1 = engine.get_complex_KPI("fun991")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
         Result2 = engine.get_complex_KPI("fun992")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
         Result3 = engine.get_alert("fun991")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
+        Result4 = engine.get_alert("fun992")("ast-xpimckaf3dlf", "2024-10-01", "2024-10-19")
         
         self.assertIsInstance(Result1["time"], np.ndarray)
         self.assertEqual(Result2["time"], None)
         self.assertIsInstance(Result3["time"], np.ndarray)
+        self.assertEqual(Result4["time"], None)
         
         self.assertIsInstance(Result1["values"], np.ndarray)
-        self.assertIsInstance(Result2["values"], float)
         self.assertIsInstance(Result3["values"], np.ndarray)
+        self.assertEqual(Result2["values"], 16720)
+        self.assertEqual(Result4["values"], True)
         
-        print(Result1)
-        print("")
-        print(Result2)
-        print("")
-        print(Result3)
-        
-
 if __name__ == "__main__":
     unittest.main()

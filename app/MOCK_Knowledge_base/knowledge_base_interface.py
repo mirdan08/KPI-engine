@@ -4,6 +4,28 @@ from MOCK_Knowledge_base.KB import get_KB
 class KnowledgeBaseInterface:
     
     __KB = get_KB()
+    
+    __units = {
+
+            'working_time': "seconds",
+            'cost_idle': "euro",
+            'bad_cycles': "#",
+            'cost': "euro per kWh",
+            'power': "kW",
+            'good_cycles': "#",
+            'consumption': "kWh",
+            'idle_time': "seconds",
+            'average_cycle_time': "seconds",
+            'cost_working': "euro",
+            'consumption_working': "kWh",
+            'offline_time': "seconds",
+            'cycles': "#",
+            'consumption_idle': "kWh"
+        }
+    
+    def unit(kpi):
+        try: return KnowledgeBaseInterface.__units[kpi]
+        except: return "?"
 
     def get_machine(machine_id):
         machines = [

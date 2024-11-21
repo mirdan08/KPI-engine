@@ -18,7 +18,7 @@ class CalculationEngine:
         "max": lambda x: max(x),
         "min": lambda x: min(x),
         "sum": lambda x: sum(x),
-        "mean": lambda x: np.mean(x),
+        "avg": lambda x: np.mean(x),
         "var": lambda x: np.var(x),
     }
 
@@ -126,9 +126,6 @@ class CalculationEngine:
         check_base_functions_aviable = CalculationEngine.__filter_aviable_base_functions_dict(result_checking["base_functions"])
         if(len(check_base_functions_aviable) != len(result_checking["base_functions"])): raise ValueError(f"The base functions {', '.join(list(set(result_checking['base_functions']).difference(set(check_base_functions_aviable))))} are not aviables")
         
-        #Check if there is not any alert
-        if(len(set(result_checking["calculators"]).intersection(CalculationEngine.__alert_dict.keys())) > 0): raise ValueError("You cannot call any alert")
-
         #Check if every complex KPI is aviable
         check_complex_KPIs_aviable = CalculationEngine.__filter_aviable_complex_KPIs(result_checking["calculators"])
         if(len(check_complex_KPIs_aviable) != len(result_checking["calculators"])): raise ValueError(f"The complex KPIs {', '.join(list(set(result_checking['calculators']).difference(set(check_complex_KPIs_aviable))))} are not aviables")
@@ -187,10 +184,12 @@ class CalculationEngine:
 
             KPIs = {kpi: GetValuesFromDatabase(machine, kpi, (start_date, end_date)) for kpi in self.__KPIs}
             complex_KPIs = {Function: CalculationEngine._calculators_dict[Function](machine, start_date, end_date)["values"] for Function in self.__complex_KPIs}
-
+            
+            Calculation = CalculationEngine.Calculator.__calculus_parser.parse(self.__expression).evaluate(KPIs | complex_KPIs | self.__base_functions)
+            
             return {
-                "time": None if self.__final_type == float else GetTimeRangeFromDatabase(start_date, end_date),
-                "values": CalculationEngine.Calculator.__calculus_parser.parse(self.__expression).evaluate(KPIs | complex_KPIs | self.__base_functions)
+                "time": None if type(Calculation) != np.ndarray else GetTimeRangeFromDatabase(start_date, end_date),
+                "values": Calculation
             }
 
         def get_name(self):

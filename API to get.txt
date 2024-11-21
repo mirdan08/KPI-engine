@@ -1,0 +1,108 @@
+Group 5:
+
+daily_kpi / get
+
+Input:
+
+- kpi name (string)
+- machine name (string)
+- date (string, formato YYYY-MM-DD)
+
+Output:
+
+- kpi name (string)
+- machine name (string)
+- date (string, formato YYYY-MM-DD)
+- value (number) (con valore associato date)
+- unit (string)
+
+range_kpi / get
+
+Input:
+
+- kpi name (string)
+- machine name (string)
+- start_date (string, formato YYYY-MM-DD)
+- finish_date (string, formato YYYY-MM-DD)
+
+Output:
+
+- kpi name (string)
+- machine name (string)
+- start_date (string, formato YYYY-MM-DD)
+- finish_date (string, formato YYYY-MM-DD)
+- values (number) (associati con le loro date)
+- unit (string)
+
+aggregation_kpi / get
+
+Input:
+
+- kpi name (string)
+- operation (string): Tipo di aggregazione (sum, avg, max, min).
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+
+Output:
+
+- kpi name (string)
+- operation (string): Tipo di aggregazione (sum, avg, max, min).
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+- value (number) (associato None)
+- unit (string)
+
+report / get
+
+Input:
+
+- kpi name (string)
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+
+Output:
+
+- kpi name (string)
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+- Values (string) (associato alle date)
+- unit (string)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------
+
+statistical_kpi / get
+
+Input:
+
+- kpi name (string)
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+- operation (string, optional)
+
+Output:
+
+- kpi name (string)
+- machine name (string)
+- start date (string, formato YYYY-MM-DD)
+- end date (string, formato YYYY-MM-DD)
+- Values (numbers) (associati a date)
+- unit (string)
+- operation (string, optional)

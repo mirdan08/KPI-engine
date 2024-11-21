@@ -5,7 +5,9 @@ DB_PATH=path.join("MOCK_Database","smart_app_data.csv")
 
 Dataset = pd.read_csv(DB_PATH)
 
-def GetValues(machine, KPI, range, operation = "sum"):
+print(Dataset.head())
+
+def GetValues(machine, KPI, range, operation = "avg"):
 
     return Dataset[(Dataset["asset_id"] == machine)
                 & (Dataset["kpi"] == KPI)
