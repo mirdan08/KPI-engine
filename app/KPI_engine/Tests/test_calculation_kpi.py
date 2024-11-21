@@ -144,7 +144,19 @@ class TestCalculationLogic(unittest.TestCase):
         
         with self.assertRaises(TypeError):
             CalculationEngine.direct_calculation_KPI("ast-xpimckaf3dlf", "max(cycles) > 0", "2024-10-01", "2024-10-19")
-            
-              
+       
+    def test_state(self):
+
+        CalculationEngine.add_complex_KPI("fun101", "KPI 1", "3 + 4")
+        CalculationEngine.add_complex_KPI("fun102", "KPI 1", "cycles + 3")
+        CalculationEngine.add_alert("fun101", "KPI 1", "max(cycles) + 3 > 0")
+        CalculationEngine.add_alert("fun102", "alert 1", "3 > 0")
+
+        CalculationEngine.save_state()
+        CalculationEngine.load_state()
+        
+        os.remove("kpi_engine_state.json")
+
+
 if __name__ == "__main__":
     unittest.main()

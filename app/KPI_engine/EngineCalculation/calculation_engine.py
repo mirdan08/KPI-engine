@@ -206,6 +206,8 @@ class CalculationEngine:
         
         #Check if every base function are in calculation engine   
         for state in states["complex_KPIs"] + states["Alerts"]:
+
+            #print(state[6])
             
             #Check base_function aviable
             if(len(set(state[6]).difference(set(CalculationEngine._complex_KPIs_dict.keys()))) > 0): raise ValueError("This state is not compatible with this engine (base functions presence in the state errors)")
