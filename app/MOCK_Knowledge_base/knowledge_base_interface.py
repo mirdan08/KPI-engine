@@ -45,7 +45,8 @@ class KnowledgeBaseInterface:
             if (kpi_v.get("node_type") == "KPI" and key == kpi)
         ]
         return KPIs[0] if len(KPIs) != 0 else None
-
+    
+    #Serve? Dipende dal gruppo 1
     def check_validity(machine_id, kpi, operation):
         machine_key, machine_node = KnowledgeBaseInterface.get_machine(machine_id)
         if machine_node is None:

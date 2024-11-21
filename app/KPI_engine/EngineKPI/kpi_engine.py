@@ -2,7 +2,6 @@ from enum import Enum
 from KPI_engine.EngineCalculation.calculation_engine import CalculationEngine
 from MOCK_Knowledge_base.knowledge_base_interface import KnowledgeBaseInterface
 
-
 class KPINames(Enum):
     WORKING_TIME = "working_time"
     IDLE_TIME = "idle_time"
@@ -17,7 +16,6 @@ class KPINames(Enum):
     GOOF_CYCLES = "good_cycles"
     AVERAGE_CYCLE_TIME = "average_cycle_time"
 
-
 class CalculationCodes(Enum):
     OK = 0
     INVALID_VALUES = 1
@@ -25,10 +23,7 @@ class CalculationCodes(Enum):
     WRONG_DATA = 3
     GENERIC_ERROR = 4
 
-
 class KPIEngine:
-    def __init__(self):
-        self.__calculation_engine = CalculationEngine()
 
     def calculate(self,
                   machine_id,

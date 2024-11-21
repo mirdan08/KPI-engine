@@ -10,7 +10,7 @@ engine = calculation_engine.CalculationEngine()
 
 class Testengine1(unittest.TestCase):
     
-    def test_method1(self):
+    def test_calculate(self):
         pass
 
 if __name__ == '__main__':

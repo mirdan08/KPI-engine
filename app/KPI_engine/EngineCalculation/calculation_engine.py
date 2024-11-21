@@ -12,7 +12,7 @@ from MOCK_Database.Database_interface import GetTimeRange as GetTimeRangeFromDat
 from MOCK_Knowledge_base.knowledge_base_interface import KnowledgeBaseInterface
 
 class CalculationEngine:
-    
+
     #Dictionary of all base functions
     _base_functions_dict = {
         "max": lambda x: max(x),
@@ -22,7 +22,7 @@ class CalculationEngine:
         "var": lambda x: np.var(x),
     }
 
-    _calculators_dict = dict()  #Dict of all complex KPIs created
+    _complex_KPIs_dict = dict()  #Dict of all complex KPIs created
     __alert_dict = dict()        #Dict of all alerts created
     
     _total_calculators = dict()    #Dict of all calculators
@@ -31,7 +31,7 @@ class CalculationEngine:
     def _update_parser():
         
         #Update total calculators
-        CalculationEngine._total_calculators = CalculationEngine._calculators_dict | CalculationEngine.__alert_dict
+        CalculationEngine._total_calculators = CalculationEngine._complex_KPIs_dict | CalculationEngine.__alert_dict
         
         #Prepare string for parser
         base_functions_dict_prepare = f"/{'/ | /'.join([base_fun for base_fun in CalculationEngine._base_functions_dict.keys()])}/"
@@ -74,7 +74,7 @@ class CalculationEngine:
                 
                 """,
                 
-            start="start")  
+            start="start")
     
     #Filter aviable base KPI names
     def __filter_aviable_KPIs(KPIs_list):
@@ -90,19 +90,17 @@ class CalculationEngine:
         calculators = [i for i in CalculationEngine._total_calculators.keys()]
         return list(filter(lambda x: x in calculators, calculators_list))
     
-    #Add calculator
-    def __add_calculator(name, description, expression, Type):
+    #Get a new creation
+    def __get_new_creation(name, description, expression, Type):
         
         #Deviate calculus between adding function and alert situation
         if(float in Type and list in Type):
-            dict = CalculationEngine._calculators_dict
+            dict = CalculationEngine._complex_KPIs_dict
             first_message = f"bool value, not a scalar or list"
             
         if(bool in Type):
             dict = CalculationEngine.__alert_dict
             first_message = f"scalar or list value, not a bool"
-
-        if(name in dict.keys()): return False
         
         #Compile
         try: parsing_tree = CalculationEngine.__parser.parse(expression)
@@ -130,25 +128,42 @@ class CalculationEngine:
         check_complex_KPIs_aviable = CalculationEngine.__filter_aviable_complex_KPIs(result_checking["calculators"])
         if(len(check_complex_KPIs_aviable) != len(result_checking["calculators"])): raise ValueError(f"The complex KPIs {', '.join(list(set(result_checking['calculators']).difference(set(check_complex_KPIs_aviable))))} are not aviables")
         
+        return dict, CalculationEngine.Calculator(name, description, expression, result_checking["type"], check_KPIs_aviable, check_base_functions_aviable, check_complex_KPIs_aviable)
+        
+    #Add calculator
+    def __add_calculator(name, description, expression, Type):
+        
+        #Deviate calculus between adding function and alert situation
+        if(float in Type and list in Type and name in CalculationEngine._complex_KPIs_dict.keys() or
+           bool in Type and name in CalculationEngine.__alert_dict.keys()): return False
+        
+        name_dict, Creation = CalculationEngine.__get_new_creation(name, description, expression, Type)
+        
         #Add the calculator to the dictionary
-        dict[name] = CalculationEngine.Calculator(name, description, expression, result_checking["type"], check_KPIs_aviable, check_base_functions_aviable, check_complex_KPIs_aviable)
+        name_dict[name] = Creation
         
         return True
     
+    def direct_calculation_KPI(machine, formula, start_date, end_date):
+        return CalculationEngine.__get_new_creation("", "", formula, [float, list])[1](machine, start_date, end_date)
+    
+    def direct_calculation_alert(machine, formula, start_date, end_date):
+        return CalculationEngine.__get_new_creation("", "", formula, [bool])[1](machine, start_date, end_date)
+    
     def add_complex_KPI(name, description, expression):
-        if(name in CalculationEngine._calculators_dict.keys()): return False
+        if(name in CalculationEngine._complex_KPIs_dict.keys()): return False
         CalculationEngine.__add_calculator(name, description, expression, [float, list])
         CalculationEngine._update_parser()
         return True
     
     def remove_complex_KPI(name):
-        if(name not in CalculationEngine._calculators_dict.keys()): return False
-        del CalculationEngine._calculators_dict[name]
+        if(name not in CalculationEngine._complex_KPIs_dict.keys()): return False
+        del CalculationEngine._complex_KPIs_dict[name]
         CalculationEngine._update_parser()
         return True
     
     def get_complex_KPI(name):
-        try: return CalculationEngine._calculators_dict[name]
+        try: return CalculationEngine._complex_KPIs_dict[name]
         except: return None
     
     def add_alert(name, description, expression):
@@ -162,6 +177,12 @@ class CalculationEngine:
     def get_alert(name):
         try: return CalculationEngine.__alert_dict[name]
         except: return None
+        
+    def get_alert_names():
+        return [i for i in CalculationEngine.__alert_dict.keys()]
+    
+    def get_complex_KPI_names():
+        return [i for i in CalculationEngine._complex_KPIs_dict.keys()]
     
     class Calculator:
         
@@ -183,7 +204,7 @@ class CalculationEngine:
         def __call__(self, machine, start_date, end_date):
 
             KPIs = {kpi: GetValuesFromDatabase(machine, kpi, (start_date, end_date)) for kpi in self.__KPIs}
-            complex_KPIs = {Function: CalculationEngine._calculators_dict[Function](machine, start_date, end_date)["values"] for Function in self.__complex_KPIs}
+            complex_KPIs = {Function: CalculationEngine._complex_KPIs_dict[Function](machine, start_date, end_date)["values"] for Function in self.__complex_KPIs}
             
             Calculation = CalculationEngine.Calculator.__calculus_parser.parse(self.__expression).evaluate(KPIs | complex_KPIs | self.__base_functions)
             
@@ -297,7 +318,7 @@ class CalculationEngine:
         def apply_calculators(self, args):
             
             return {
-                "type": CalculationEngine._calculators_dict[args[0].children[0].value].get_result_type(),
+                "type": CalculationEngine._complex_KPIs_dict[args[0].children[0].value].get_result_type(),
                 "KPIs": [],
                 "base_functions": [],
                 "calculators": [args[0].children[0].value],

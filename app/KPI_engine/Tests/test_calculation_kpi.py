@@ -134,5 +134,17 @@ class TestCalculationLogic(unittest.TestCase):
         self.assertEqual(Result2["values"], 16720)
         self.assertEqual(Result4["values"], True)
         
+    def test_direct_calculation(self):
+        
+        self.assertEqual(CalculationEngine.direct_calculation_KPI("ast-xpimckaf3dlf", "max(cycles)", "2024-10-01", "2024-10-19")["values"], 16720.0)
+        self.assertEqual(CalculationEngine.direct_calculation_alert("ast-xpimckaf3dlf", "max(cycles) > 0", "2024-10-01", "2024-10-19")["values"], True)
+        
+        with self.assertRaises(TypeError):
+            CalculationEngine.direct_calculation_alert("ast-xpimckaf3dlf", "max(cycles)", "2024-10-01", "2024-10-19")
+        
+        with self.assertRaises(TypeError):
+            CalculationEngine.direct_calculation_KPI("ast-xpimckaf3dlf", "max(cycles) > 0", "2024-10-01", "2024-10-19")
+            
+              
 if __name__ == "__main__":
     unittest.main()

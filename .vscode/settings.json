@@ -7,4 +7,11 @@
         "-p",
         "test_*.py"
     ],
+
+    "files.exclude": {
+
+    "**/__init__.py": true,
+    "**/__pycache__": true
+
+    }
 }

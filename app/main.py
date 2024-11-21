@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, Path, status
 from fastapi.responses import JSONResponse
+from KPI_engine.EngineCalculation.calculation_engine import CalculationEngine
 from KPI_engine.EngineKPI.kpi_engine import KPIEngine
 from models import KPI, calculation_request
 app = FastAPI()
@@ -9,7 +10,6 @@ start_date = "2024-10-14"
 end_date = "2024-10-19"
 machine_id = "ast-xpimckaf3dlf"
 expression = "(good_cycles/cycles)" """
-
 
 engine = KPIEngine()
 @app.get("/calculate/")
