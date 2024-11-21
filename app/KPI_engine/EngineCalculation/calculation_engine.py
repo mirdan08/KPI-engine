@@ -43,7 +43,7 @@ class CalculationEngine:
                 %import common.WS
                 %ignore WS
                     
-                ?start: l0                  -> total_base
+                ?start: l0                  -> base
 
                 ?l0: l1 "<" l1              -> le
                 | l1 ">" l1                 -> ge
@@ -64,8 +64,8 @@ class CalculationEngine:
                 ?l3: "-" l3                 -> inverse_sign
                 | base_function "(" l1 ")"  -> apply_base_function
                 | l3 "^" l1                 -> pow
+                | calculators               -> apply_calculators
                 | kpi_name                  -> kpi
-                | calculators                 -> apply_calculators
                 | NUMBER                    -> number 
                 
                 base_function:   {base_functions_dict_prepare}
@@ -94,11 +94,11 @@ class CalculationEngine:
     def __add_calculator(name, description, expression, Type):
         
         #Deviate calculus between adding function and alert situation
-        if(Type == float):
+        if(float in Type and list in Type):
             dict = CalculationEngine._calculators_dict
             first_message = f"bool value, not a scalar or list"
             
-        if(Type == bool):
+        if(bool in Type):
             dict = CalculationEngine.__alert_dict
             first_message = f"scalar or list value, not a bool"
 
@@ -113,7 +113,7 @@ class CalculationEngine:
         except Exception as e: raise TypeError(e.orig_exc)
         
         #Check if type of expression is equals to excepted type
-        if(result_checking["type"] != Type): raise TypeError(f"This expression {expression} gives a {first_message}")
+        if(result_checking["type"] not in Type): raise TypeError(f"This expression {expression} gives a {first_message}")
         
         #Check if this calculator doesn't call itself
         if(name in result_checking["calculators"]): raise ValueError(f"This creation cannot call itself")
@@ -140,7 +140,7 @@ class CalculationEngine:
     
     def add_complex_KPI(name, description, expression):
         if(name in CalculationEngine._calculators_dict.keys()): return False
-        CalculationEngine.__add_calculator(name, description, expression, float)
+        CalculationEngine.__add_calculator(name, description, expression, [float, list])
         CalculationEngine._update_parser()
         return True
     
@@ -155,7 +155,7 @@ class CalculationEngine:
         except: return None
     
     def add_alert(name, description, expression):
-        return CalculationEngine.__add_calculator(name, description, expression, bool)
+        return CalculationEngine.__add_calculator(name, description, expression, [bool])
     
     def remove_alert(name): 
         if(name not in CalculationEngine.__alert_dict.keys()): return False
@@ -188,15 +188,10 @@ class CalculationEngine:
             KPIs = {kpi: GetValuesFromDatabase(machine, kpi, (start_date, end_date)) for kpi in self.__KPIs}
             complex_KPIs = {Function: CalculationEngine._calculators_dict[Function](machine, start_date, end_date)["values"] for Function in self.__complex_KPIs}
 
-            Calculation = CalculationEngine.Calculator.__calculus_parser.parse(self.__expression).evaluate(KPIs | complex_KPIs | self.__base_functions)
-
-            Result = {
-                "time": None if self.__final_type in [bool, float] else GetTimeRangeFromDatabase(start_date, end_date),
-                "values": Calculation
+            return {
+                "time": None if self.__final_type == float else GetTimeRangeFromDatabase(start_date, end_date),
+                "values": CalculationEngine.Calculator.__calculus_parser.parse(self.__expression).evaluate(KPIs | complex_KPIs | self.__base_functions)
             }
-  
-            return Result
-
 
         def get_name(self):
             return self.__name
@@ -219,27 +214,12 @@ class CalculationEngine:
     #Every node pass a dict with: own type, all sub kpi name, all sub functions
     #Type float represents scalar and series (for conventional choice)
     class GeneralChecking(Transformer):
-        
-        def total_base(self, args):
-            
-            return {
-                "type": float if args[0]["type"] == list else args[0]["type"],
-                "KPIs": args[0]["KPIs"],
-                "base_functions": args[0]["base_functions"],
-                "calculators": args[0]["calculators"]
-            }
-            
+
         def base(self, args):
             return args[0]
         
         def __base_operation(self, args, Type):
-            
-            if(Type == bool and (args[0]["type"] == list or args[1]["type"] ==list)): raise TypeError("You cannot confronts with a condition a list with a scalar or a list with a list")   
-            elif(Type != bool):
-                if(args[0]["type"] in [float, list] and args[1]["type"] in [float, list]):
-                    if(args[0]["type"] == list or args[1]["type"] == list): Type = list
-                    else: Type = float
-                
+ 
             return {
                 "type": Type,
                 "KPIs": args[0]["KPIs"] + args[1]["KPIs"],
