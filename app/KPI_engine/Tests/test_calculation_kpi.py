@@ -21,7 +21,7 @@ class TestCalculationLogic(unittest.TestCase):
         
         self.assertEquals(fun2.get_name(), "fun22")
         self.assertEquals(fun2.get_description(), "Description2")
-        self.assertEquals(fun2.get_expression(), "base_max(cycles) + 3 + fun12")
+        self.assertEquals(fun2.get_expression(), "max(cycles) + 3 + fun12")
         self.assertEquals(fun2.get_KPIs(), ["cycles"])
         self.assertEquals(fun2.get_complex_KPIs(), ["fun12"])
         self.assertEquals(fun2.get_result_type(), float)

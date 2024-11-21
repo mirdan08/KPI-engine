@@ -6,6 +6,7 @@ import numpy as np
 from lark import Lark, Transformer
 import numexpr as ne
 from py_expression_eval import Parser
+import json
 
 from MOCK_Database.Database_interface import GetValues as GetValuesFromDatabase
 from MOCK_Database.Database_interface import GetTimeRange as GetTimeRangeFromDatabase
@@ -68,8 +69,8 @@ class CalculationEngine:
                 | kpi_name                  -> kpi
                 | NUMBER                    -> number 
                 
-                base_function:   {base_functions_dict_prepare}
-                kpi_name:        /[a-z_]+/
+                base_function:     {base_functions_dict_prepare}
+                kpi_name:          /[a-z_]+/
                 calculators:       {calculators_prepare}
                 
                 """,
@@ -184,8 +185,50 @@ class CalculationEngine:
     def get_complex_KPI_names():
         return [i for i in CalculationEngine._complex_KPIs_dict.keys()]
     
-    class Calculator:
+    def save_state(path = ""):
         
+        states = dict()
+        
+        states["complex_KPIs"] = [[x.get_name(), x.get_description(), x.get_expression(), x.get_result_type().__name__, x.get_KPIs(), x.get_base_functions(), x.get_complex_KPIs()] for x in CalculationEngine._complex_KPIs_dict.values()]
+        states["Alerts"] =       [[x.get_name(), x.get_description(), x.get_expression(), x.get_result_type().__name__, x.get_KPIs(), x.get_base_functions(), x.get_complex_KPIs()] for x in CalculationEngine.__alert_dict.values()]
+
+        if(path == ""): path = "kpi_engine_state.json"
+        else:           path = f"{path}\\kpi_engine_state.json"
+        
+        json.dump(states, open(path, "w"), indent = 4)
+            
+    def load_state(path = ""):
+        
+        if(path == ""): path = "kpi_engine_state.json"
+        else:           path = f"{path}\\kpi_engine_state.json"
+        
+        states = json.load(open(path, "r"))
+        
+        #Check if every base function are in calculation engine   
+        for state in states["complex_KPIs"] + states["Alerts"]:
+            
+            #Check base_function aviable
+            if(len(set(state[6]).difference(set(CalculationEngine._complex_KPIs_dict.keys()))) > 0): raise ValueError("This state is not compatible with this engine (base functions presence in the state errors)")
+        
+        CalculationEngine._complex_KPIs_dict.clear()
+        CalculationEngine.__alert_dict.clear()
+        
+        types_map = {
+            "float": float,
+            "list": list,
+            "bool": bool
+        }
+        
+        for name, description, expr, type_result, KPIs, base_functions, complex_KPIs in states["complex_KPIs"]:
+            CalculationEngine._complex_KPIs_dict[name] = CalculationEngine.Calculator(name, description, expr, types_map[type_result],
+                                                                                      KPIs, base_functions, complex_KPIs)
+        
+        for name, description, expr, type_result, KPIs, base_functions, complex_KPIs in states["Alerts"]:
+            CalculationEngine.__alert_dict[name] = CalculationEngine.Calculator(name, description, expr, types_map[type_result],
+                                                                                      KPIs, base_functions, complex_KPIs)
+
+    class Calculator:
+    
         __calculus_parser = Parser()
         
         def __init__(self, name, description, expression, final_type, KPIs, base_functions, complex_KPIs):
@@ -197,9 +240,7 @@ class CalculationEngine:
             self.__KPIs = list(KPIs)
             self.__complex_KPIs = list(complex_KPIs)
 
-            for base_function in base_functions: self.__expression = self.__expression.replace(base_function, f"base_{base_function}")
-            
-            self.__base_functions = {f"base_{Function}": lambda x: CalculationEngine._base_functions_dict[Function](x) for Function in base_functions}
+            self.__base_functions = {Function: lambda x: CalculationEngine._base_functions_dict[Function](x) for Function in base_functions}
             
         def __call__(self, machine, start_date, end_date):
 
@@ -230,6 +271,10 @@ class CalculationEngine:
         
         def get_result_type(self):
             return self.__final_type
+        
+        def get_base_functions(self):
+            return list(self.__base_functions.keys())
+        
         
     #Every node pass a dict with: own type, all sub kpi name, all sub functions
     #Type float represents scalar and series (for conventional choice)
